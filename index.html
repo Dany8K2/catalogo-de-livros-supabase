@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <title>Catálogo de Livros - Supabase</title>
+</head>
+<body>
+  <h1>📚 Catálogo de Livros</h1>
+  <input id="titulo" placeholder="Título do livro">
+  <input id="autor" placeholder="Autor">
+  <button id="add">Adicionar Livro</button>
+  <ul id="lista"></ul>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://mqbtzwtibupchjfekvwo.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xYnR6d3RpYnVwY2hqZmVrdndvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI3Nzg3MjQsImV4cCI6MjA3ODM1NDcyNH0.w9C51JutoRW9LkF7qGt0ShmUA8epeHwNYgQCqqg_uuE";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function carregarLivros() {
+      const { data } = await supabase
+        .from('livros')
+        .select('*')
+        .order('created_at', { ascending: false });
+      document.getElementById('lista').innerHTML = (data || [])
+        .map(l => `<li><strong>${l.titulo}</strong> — ${l.autor}</li>`)
+        .join('');
+    }
+
+    async function adicionarLivro() {
+      const titulo = document.getElementById('titulo').value.trim();
+      const autor = document.getElementById('autor').value.trim();
+      if (!titulo || !autor) return;
+      await supabase.from('livros').insert({ titulo, autor });
+      document.getElementById('titulo').value = '';
+      document.getElementById('autor').value = '';
+      carregarLivros();
+    }
+
+    document.getElementById('add').onclick = adicionarLivro;
+    carregarLivros();
+  </script>
+</body>
+</html>
